@@ -1,9 +1,14 @@
 import mysql.connector
 
 
+# Função para conexão
 def get_connection():
     return mysql.connector.connect(
-        host="localhost", user="root", password="root", database="db_task"
+        host="localhost",
+        port="3307",
+        user="root",
+        password="root",
+        database="db_todo_list",
     )
 
 
@@ -13,7 +18,7 @@ def create_task(name, description):
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        command = 'INSERT INTO tasks (task_name,tasks_descript) VALUES (%s, %s)'
+        command = "INSERT INTO tasks (task_name,task_descript) VALUES (%s, %s)"
         cursor.execute(command, (name, description))
         conn.commit()
     except mysql.connector.Error as err:
@@ -24,36 +29,60 @@ def create_task(name, description):
         conn.close()
 
 
-# create_task("Enviar vídeo para a manu", "Enviar vídeo sobre python e mysql.")
+# READ
+def readAll_task():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        command = "SELECT * FROM tasks"
+        cursor.execute(command)
+        result = cursor.fetchall()
+
+        print("\n📋 Lista de Tarefas:\n")
+        for task in result:
+            id, name, descript = task
+            print(f"Id: {id}")
+            print(f"Nome: {name}")
+            print(f"Descrição: {descript}")
+            print("-" * 60)
+
+    except mysql.connector.Error as err:
+        print(f"[ERRO] ao inserir: {err}")
+
+    finally:
+        cursor.close()
+        conn.close()
 
 
-# # READ
-# def readAll_task():
-#     command = "SELECT * FROM tasks"
-#     cursor.execute(command)
-#     resultado = cursor.fetchall()
-#     print(resultado)
+# UPDATE
+def update_task(name, description, nameTask):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        command = (
+            "UPDATE tasks SET task_name = %s, task_descript = %s WHERE task_name = %s"
+        )
+        cursor.execute(command, (name, description, nameTask))
+        conn.commit()
+    except mysql.connector.Error as err:
+        print(f"[ERRO] ao inserir: {err}")
+
+    finally:
+        cursor.close()
+        conn.close()
 
 
-# # readAll_task()
+# DELETE
+def delete_task(id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        command = "DELETE FROM tasks WHERE idtasks = %s"
+        cursor.execute(command, (id,))
+        conn.commit()
+    except mysql.connector.Error as err:
+        print(f"[ERRO] ao inserir: {err}")
 
-
-# # UPDATE
-# def update_task(id, name, description):
-#     command = f'UPDATE tasks SET task_name = "{name}", tasks_descript = "{description}" WHERE idtasks = {id}'
-#     cursor.execute(command)
-#     mydb.commit()
-
-
-# # update_task(3, "Estudar Java", "Estudar java com o Xissum 2222.")
-
-# # DELETE
-
-
-# def delete_task(id):
-#     command = f"DELETE FROM tasks WHERE idtasks = {id}"
-#     cursor.execute(command)
-#     mydb.commit()
-
-
-# delete_task(4)
+    finally:
+        cursor.close()
+        conn.close()
